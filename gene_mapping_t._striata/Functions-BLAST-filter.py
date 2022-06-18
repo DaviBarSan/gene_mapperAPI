@@ -4,7 +4,7 @@ import xlsxwriter
 from scrappingTools import scrappingFunctions
 
 #create a workbook and a worksheet ---> ('newfilename.xlsx')
-workbook = xlsxwriter.Workbook('PSY-phytoene-synthase-Chlorophytas_test.xlsx')
+workbook = xlsxwriter.Workbook('PSY-phytoene-synthase-Chlorophytas_new_test.xlsx')
 worksheet = workbook.add_worksheet()
 
 parameters = ('Query Name', 'Query Acss Number', 'Biological Source','Contig Acss Number', 'Score (Bits)', 'Expect', 'Frame', 'Start', 'Stop','Protein Coverage - Start', 'Protein Coverage - Stop','Length')
@@ -29,8 +29,9 @@ for item in parameters:
     worksheet.write(row, col, item)
     col +=1
 row +=1
-#set file path 
-filename = "/home/barrel/Desktop/Biologia/P5/Bioinformática/Projeto_Bioinfo/BLAST-DATA/CTP4/BLAST-results/TBLASTN-results/blast-PSY-phytoene-synthase-Chlorophytas.txt"
+#!!!!!!UPDATE HERE!!!! OS.PWD
+#set TBLASTN alignment result file path 
+filename = "/home/barrsant/Desktop/learning/Portifolio/tblastn_mapper_API/gene_mapping_t._striata/blast-PSY-phytoene-synthase-Chlorophytas.txt"
 fi = open(filename, "r")
 
 contents = fi.readlines()   
@@ -99,7 +100,7 @@ for line in contents:
         worksheet.write_number(row, 5, e_value_data)
     #caso encontre frame value
     if re.search(r"\bFrame\s=\s.+", line):
-        frame_str_data = frame_data(line)
+        frame_str_data = scrappingFunctions.frame_data(line)
         worksheet.write_string(row, 6, frame_str_data)
        
         #uma vez que o position_number é preenchido segundo os dados do match anterior,

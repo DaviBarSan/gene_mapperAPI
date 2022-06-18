@@ -1,4 +1,4 @@
-
+import re
 #function to create a list with query id
 def query_acess_number(string_line): 
     #(?<=y\s) means lookahead regex match and do not count 'y=' + '\s' (== whitespace) in match result
@@ -8,14 +8,14 @@ def query_acess_number(string_line):
 #funtion that returns enzyme name data in current line
 def query_name(string_line):    
     try:
-        query_name = re.search(r"(?<=\.\d\s\b)\w...+(?=\[)", line)
+        query_name = re.search(r"(?<=\.\d\s\b)\w...+(?=\[)", string_line)
         return query_name.group()
     except AttributeError:
         try:
-            query_name = re.search(r"(?<=\.\d\s\b)\w...+", line)
+            query_name = re.search(r"(?<=\.\d\s\b)\w...+", string_line)
             return query_name.group()
         except AttributeError:
-            query_name = re.search(r"(?<=Full=)\w...+", line)
+            query_name = re.search(r"(?<=Full=)\w...+", string_line)
             return query_name.group()
 
 
