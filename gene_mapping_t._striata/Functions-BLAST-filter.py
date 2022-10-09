@@ -1,9 +1,10 @@
 #this file must be inside TBLASTn-resulsts directory to locate 
 import re
 import xlsxwriter
+from scrappingTools import scrappingFunctions
 
 #create a workbook and a worksheet ---> ('newfilename.xlsx')
-workbook = xlsxwriter.Workbook('PSY-phytoene-synthase-Chlorophytas_test.xlsx')
+workbook = xlsxwriter.Workbook('PSY-phytoene-synthase-Chlorophytas_new_test.xlsx')
 worksheet = workbook.add_worksheet()
 
 parameters = ('Query Name', 'Query Acss Number', 'Biological Source','Contig Acss Number', 'Score (Bits)', 'Expect', 'Frame', 'Start', 'Stop','Protein Coverage - Start', 'Protein Coverage - Stop','Length')
@@ -28,62 +29,12 @@ for item in parameters:
     worksheet.write(row, col, item)
     col +=1
 row +=1
-#set file path 
-filename = "/home/barrel/Desktop/Biologia/P5/Bioinformática/Projeto_Bioinfo/BLAST-DATA/CTP4/BLAST-results/TBLASTN-results/blast-PSY-phytoene-synthase-Chlorophytas.txt"
+#!!!!!!UPDATE HERE!!!! OS.PWD
+#set TBLASTN alignment result file path 
+filename = "/home/barrsant/Desktop/learning/Portifolio/tblastn_mapper_API/gene_mapping_t._striata/blast-PSY-phytoene-synthase-Chlorophytas.txt"
 fi = open(filename, "r")
 
-contents = fi.readlines()
-
-#function to create a list with query id
-def query_acess_number(string_line): 
-    #(?<=y\s) means lookahead regex match and do not count 'y=' + '\s' (== whitespace) in match result
-    query_access_number = re.search(r"(?<=y=\s)...\w+...(?=\w)", string_line)
-    return query_access_number.group()
-    
-#funtion that returns enzyme name data in current line
-def query_name(string_line):    
-    try:
-        query_name = re.search(r"(?<=\.\d\s\b)\w...+(?=\[)", line)
-        return query_name.group()
-    except AttributeError:
-        try:
-            query_name = re.search(r"(?<=\.\d\s\b)\w...+", line)
-            return query_name.group()
-        except AttributeError:
-            query_name = re.search(r"(?<=Full=)\w...+", line)
-            return query_name.group()
-
-
-#function to return contig_id in each line
-def contig_id(string_line):
-    contig_id = re.search(r"^>\w+", string_line, re.MULTILINE)
-    return contig_id.group()
-
-#function to store as string contig data (score) for each alingment
-def score_data(string_line):
-    score_data = re.search(r"(?<=\bScore\b\s\=\s)\d+.\d", string_line)
-    return score_data.group()
-
-
-#function to store as string contig data (expect == e-value) for each alingment 
-def expect_value(string_line): 
-    #regex \bExpect matches exactly tihs characters after \b(bounderies), + is greedy search. (?=,) is look behind match ','.
-    expect_data_raw = re.search(r"(?<=\bExpect...)...+(?=,)", string_line)
-    expect_data = re.search(r"(?<=\b)\d.+", str(expect_data_raw.group()))
-    
-    return float(expect_data.group())
-
-#function to store as string contig data (reading frame) for each alingment
-def frame_data(string_line):
-    frame_data = re.search(r"(?<=\bFrame\s=\s).+", string_line)
-    
-    return frame_data.group()
-
-#function store lenght of current query
-def query_prot_len(string_line):
-    prot_length = re.search(r"(?<=\bLength\b=\b).+", string_line)
-    return prot_length.group()
-   
+contents = fi.readlines()   
 
 #iterating over blastresults data for each line
 for line in contents:
@@ -91,15 +42,15 @@ for line in contents:
     if re.search(r"Query=...+", line):
         #data_id_row += 1
         #atualizar query_data para preenchimento da célula (novo query)
-        query_numb = query_acess_number(line)
+        query_numb = scrappingFunctions.query_acess_number(line)
         worksheet.write(row, 1, query_numb)
         #regexing enzyme name and specie name in list[1]
-        enzyme_name = query_name(line)
+        enzyme_name = scrappingFunctions.query_name(line)
         worksheet.write(row, 0, enzyme_name)
         protein_len_flag = True
     
     if (re.search(r"(?<=\bLength\b=\b).+", line) and protein_len_flag == True):
-        curr_prot_len = query_prot_len(line)
+        curr_prot_len = scrappingFunctions.query_prot_len(line)
         worksheet.write(row, 11, curr_prot_len)
         protein_len_flag = False
 
@@ -133,7 +84,7 @@ for line in contents:
         specie_puzzle.clear()
     #caso encontre contig id em line
     elif re.search(r"^>\w+", line): 
-        contig_str_id = contig_id(line)
+        contig_str_id = scrappingFunctions.contig_id(line)
         worksheet.write_string(row, 3, contig_str_id)
     #a cada iteração do 'for', preencher células abaixo do primeiro match do id,
     #enquanto este id não for atualizado
@@ -141,15 +92,15 @@ for line in contents:
     
     #caso encontre score data em line
     if re.search(r"\bScore\b\s\=\s\d+.\d", line):
-        score_str_data = score_data(line)
+        score_str_data = scrappingFunctions.score_data(line)
         worksheet.write_string(row, 4, score_str_data)
     #caso encontre expect value data
     if re.search(r"(?<=\bExpect...)...+(?=,)", line):
-        e_value_data = expect_value(line)
+        e_value_data = scrappingFunctions.expect_value(line)
         worksheet.write_number(row, 5, e_value_data)
     #caso encontre frame value
     if re.search(r"\bFrame\s=\s.+", line):
-        frame_str_data = frame_data(line)
+        frame_str_data = scrappingFunctions.frame_data(line)
         worksheet.write_string(row, 6, frame_str_data)
        
         #uma vez que o position_number é preenchido segundo os dados do match anterior,
